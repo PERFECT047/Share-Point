@@ -1,7 +1,8 @@
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
-import { decode, verify } from "hono/jwt";
+import { verify } from "hono/jwt";
+import { createBlogInput, updateBlogInput } from "@perfect047/sharepiont-common"
 
 const blogRouter = new Hono<{
     Bindings: {
@@ -23,7 +24,7 @@ const blogRouter = new Hono<{
           return c.json({ message: 'Invalid token payload: missing user ID' }, 403);
         }
 
-        c.set('userId', userId);
+        c.set('userId', String(userId));
         await next();
       } 
       catch (error) {
@@ -73,6 +74,13 @@ const blogRouter = new Hono<{
 
       const body = await c.req.json();
 
+      const { success } = createBlogInput.safeParse(body);
+
+      if(!success){
+        c.status(411);
+        return c.json({"message": "Invalid Input"});
+      }
+
       const blog = await prisma.post.create({
         data: {
             title: body.title,
@@ -95,6 +103,13 @@ const blogRouter = new Hono<{
       }).$extends(withAccelerate());
 
       const body = await c.req.json();
+
+      const { success } = updateBlogInput.safeParse(body);
+
+      if(!success){
+        c.status(411);
+        return c.json({"message": "Invalid Input"});
+      }
 
       const blog = await prisma.post.update({
         where: {

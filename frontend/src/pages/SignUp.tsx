@@ -11,7 +11,7 @@ const SignUp = () => {
             <div>
                 <Auth type="signup"/>
             </div>
-            <div className="invisible lg:visible">
+            <div className="none lg:block">
                 <Quote />
             </div>
             
